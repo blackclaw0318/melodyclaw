@@ -6,7 +6,7 @@ torchaudio==2.2.0
 
 # RVC 核心依赖
 fairseq==0.12.2
-faiss-cpu==1.7.4
+faiss-cpu>=1.8.0
 librosa==0.10.1
 numpy==1.26.3
 scipy==1.12.0
