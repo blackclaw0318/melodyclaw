@@ -1,0 +1,13 @@
+# Demucs 人声分离服务依赖
+# PyTorch CPU 版本
+torch==2.2.0
+torchaudio==2.2.0
+--index-url https://pypi.tuna.tsinghua.edu.cn/simple
+
+# Demucs
+demucs==4.0.1
+
+# HTTP 服务
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+python-multipart==0.0.6
