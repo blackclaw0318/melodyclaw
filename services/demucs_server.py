@@ -76,7 +76,8 @@ async def separate(request: SeparateRequest):
         
         # 推理
         with torch.no_grad():
-            sources = model(waveform[None, :])[0]
+            from demucs.apply import apply_model
+            sources = apply_model(model, waveform[None, :], device=DEVICE)[0]
         
         print(f"[*] 分离完成，输出源数量：{len(sources)}")
         
