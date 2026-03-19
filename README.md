@@ -1,159 +1,160 @@
-# MelodyClaw - 歌声克隆系统
+# 🦞 MelodyClaw - AI 歌声克隆系统
 
-> 需求设计文档
+> 完全本地化运行，CPU 推理，零 API 费用
 
-## 📋 项目概述
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.12-green.svg)](https://python.org)
+[![Vue](https://img.shields.io/badge/vue-3.4-green.svg)](https://vuejs.org)
 
-MelodyClaw 是一个歌声克隆系统，**完全本地化运行**，所有 AI 模型在 CPU 上推理，无需外部 API。
+## ✨ 特性
 
-### 核心特性
+- 🎤 **人声分离** - Demucs AI 模型，分离人声和伴奏
+- 📝 **歌词对齐** - Silero VAD，自动生成时间戳
+- 🎭 **音色克隆** - 6 种预设音色，CPU 推理
+- 🦞 **小龙虾动画** - 随音乐律动的可爱播放器
+- 📱 **响应式设计** - 手机/平板/桌面全适配
+- 🔒 **隐私安全** - 数据完全本地，不上传云端
 
-- 🦞 **小龙虾动画播放器** - 根据歌词/节奏做出反应
-- 🎵 **歌声克隆** - 保留原曲旋律和情感
-- 📱 **响应式设计** - 自动适配手机和电脑
-- 💰 **零成本** - 完全本地，无API费用
-- 🔒 **隐私安全** - 数据不离开服务器
+## 🚀 快速开始
 
-### 与传统 TTS 的区别
+### Docker 部署 (推荐)
 
-| 功能 | 传统 TTS | 歌声克隆 |
-|------|----------|----------|
-| 输出 | 朗读文本 | **演唱歌曲** |
-| 旋律 | 无 | **保留原曲旋律** |
-| 节奏 | 固定 | **跟随歌曲节奏** |
-| 情感 | 有限 | **保留演唱情感** |
+```bash
+# 克隆项目
+git clone https://github.com/blackclaw0318/melodyclaw.git
+cd melodyclaw
 
----
+# 启动服务
+docker-compose up -d
 
-## 🏗️ 架构设计
-
-### 整体架构
-
-```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│    前端 Vue3    │────▶│  后端 FastAPI   │────▶│   本地 AI 模型   │
-│  小龙虾播放器   │     │  (本地CPU处理)  │     │ Demucs + RVC    │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
+# 访问
+# 前端：http://localhost:3000
+# API: http://localhost:8000/docs
 ```
 
-### 本地 AI 模型
+### 本地部署
 
-| 功能 | 模型 | 内存 | 速度 |
-|------|------|------|------|
-| 人声分离 | Demucs htdemucs_ft | ~800MB | 1分钟/分钟 |
-| 歌词对齐 | Silero VAD | ~500MB | 实时 10x+ |
-| 音色克隆 | RVC v2 | ~2.5GB | 4分钟/分钟 |
+```bash
+# 1. 安装依赖
+pip install -r requirements-main.txt
+pip install -r requirements-demucs.txt
+pip install -r requirements-silero.txt
+pip install -r requirements-rvc.txt
 
-### 硬件要求
+# 2. 启动服务
+python services/demucs_server.py &
+python services/silero_server.py &
+python services/rvc_server.py &
+python backend/app/main.py &
 
-| 项目 | 最低 | 推荐 |
-|------|------|------|
-| CPU | 4核 | 8核 |
-| 内存 | 8GB | 16GB |
-| GPU | 不需要 | - |
+# 3. 前端
+cd frontend
+npm install
+npm run dev
+```
+
+## 📁 项目结构
+
+```
+melodyclaw/
+├── backend/          # FastAPI 后端
+│   └── app/
+│       ├── main.py   # 主 API
+│       ├── models.py # 数据库模型
+│       └── database.py
+├── frontend/         # Vue3 前端
+│   └── src/
+│       ├── views/    # 页面组件
+│       └── components/
+├── services/         # AI 服务
+│   ├── demucs_server.py
+│   ├── silero_server.py
+│   └── rvc_server.py
+├── models/           # 模型文件
+├── docs/             # 文档
+└── docker-compose.yml
+```
+
+## 🎯 使用流程
+
+1. **上传歌曲** - 支持 MP3/WAV/FLAC/M4A/OGG
+2. **人声分离** - AI 分离人声和伴奏 (~1 倍实时)
+3. **歌词对齐** - 输入歌词，自动生成时间戳
+4. **音色克隆** - 选择预设音色，生成克隆版本
+5. **下载结果** - 下载克隆后的音频
+
+## 🎤 预设音色
+
+| 音色 | 风格 | F0 范围 | 适用场景 |
+|------|------|--------|----------|
+| 流行男声 | 温暖明亮 | 80-400Hz | 流行、抒情 |
+| 流行女声 | 清澈甜美 | 150-600Hz | 流行、抒情 |
+| 摇滚男声 | 粗犷有力 | 70-350Hz | 摇滚、金属 |
+| 民谣嗓音 | 朴实自然 | 90-420Hz | 民谣、乡村 |
+| 童声 | 稚嫩可爱 | 200-800Hz | 儿歌、童谣 |
+| 低沉嗓音 | 浑厚磁性 | 60-300Hz | 抒情、爵士 |
+
+## 📊 性能
+
+| 操作 | 1 分钟 | 3 分钟 | 5 分钟 |
+|------|--------|--------|--------|
+| 人声分离 | ~60s | ~180s | ~300s |
+| 歌词对齐 | ~10s | ~30s | ~50s |
+| 音色克隆 | ~90s | ~270s | ~450s |
+
+**硬件要求:**
+- CPU: 4 核+
+- 内存：16GB+
+- 存储：50GB+
+
+## 📖 文档
+
+- [部署指南](docs/DEPLOYMENT.md)
+- [性能优化](docs/PERFORMANCE.md)
+- [集成测试](docs/INTEGRATION_TEST.md)
+- [模型测试报告](docs/MODEL_TEST_REPORT.md)
+
+## 🛠️ 技术栈
+
+**后端:**
+- FastAPI + Uvicorn
+- SQLAlchemy + SQLite
+- Celery (任务队列)
+
+**AI 模型:**
+- Demucs (人声分离)
+- Silero VAD (语音检测)
+- Hubert + RVC (音色克隆)
+
+**前端:**
+- Vue3 + Vite
+- Pinia (状态管理)
+- Vue Router
+
+**部署:**
+- Docker + Docker Compose
+- Nginx (反向代理)
+
+## 📝 开发进度
+
+- [x] 阶段 1: 环境与模型部署
+- [x] 阶段 2: 后端 API 开发
+- [x] 阶段 3: 前端开发
+- [x] 阶段 4: 集成优化
+- [ ] 阶段 5: 商业化功能
+
+## 🤝 贡献
+
+欢迎提交 Issue 和 Pull Request!
+
+## 📄 许可证
+
+MIT License
+
+## 👥 作者
+
+- **blackclaw0318** - [GitHub](https://github.com/blackclaw0318)
 
 ---
 
-## 🖥️ 前端页面
-
-### 页面列表
-
-| 页面 | 功能 |
-|------|------|
-| 首页 | 小龙虾播放器 + 快速入口 |
-| 歌曲管理 | 上传歌曲、触发人声分离 |
-| 歌词编辑 | 上传歌词、自动对齐时间戳 |
-| 克隆任务 | 选择预设音色、创建任务、查看进度 |
-| 结果展示 | 对比播放、下载 |
-
-### 预设音色
-
-系统内置 6 种预设音色，用户无需上传音色模型：
-
-| 音色 | 风格 | 适用场景 |
-|------|------|----------|
-| 流行男声 | 温暖明亮 | 流行、抒情 |
-| 流行女声 | 清澈甜美 | 流行、抒情 |
-| 摇滚男声 | 粗犷有力 | 摇滚、金属 |
-| 民谣嗓音 | 朴实自然 | 民谣、乡村 |
-| 童声 | 稚嫩可爱 | 儿歌、童谣 |
-| 低沉嗓音 | 浑厚磁性 | 抒情、爵士 |
-
-### 小龙虾动画功能
-
-- 🦞 唱歌时钳子摆动、身体律动
-- 📜 歌词滚动显示，当前歌词高亮
-- 💨 气泡和音符飘出效果
-- 🎵 根据音乐节奏做出反应
-- 📱 响应式设计（手机/平板/桌面）
-
----
-
-## 🔌 后端 API
-
-### 核心 API 列表
-
-| API | 方法 | 说明 |
-|-----|------|------|
-| `/api/v1/songs` | GET/POST | 歌曲列表/上传 |
-| `/api/v1/songs/{id}/separate` | POST | 触发人声分离（本地） |
-| `/api/v1/lyrics/{id}/align` | POST | 自动对齐歌词（本地） |
-| `/api/v1/voices/preset` | GET | 获取预设音色列表 |
-| `/api/v1/clone/tasks` | GET/POST | 克隆任务列表/创建（本地） |
-| `/api/v1/clone/results/{id}` | GET | 获取克隆结果 |
-
----
-
-## 💰 成本与性能
-
-### 成本分析
-
-| 项目 | 成本 |
-|------|------|
-| 人声分离 | 免费 |
-| 歌词对齐 | 免费 |
-| 音色克隆 | 免费 |
-| **合计** | **免费** |
-
-### 处理时间（3分钟歌曲）
-
-| 步骤 | 时间 |
-|------|------|
-| 人声分离 | ~1分钟 |
-| 歌词对齐 | ~10秒 |
-| 音色克隆 | ~12分钟 |
-| 音频混合 | ~5秒 |
-| **总计** | **~13分钟** |
-
-### 内存占用
-
-- 峰值: ~4GB
-- 平均: ~2GB
-- 推荐: 16GB 内存服务器
-
----
-
-## 📁 文档目录
-
-| 文档 | 说明 |
-|------|------|
-| [架构设计](docs/ARCHITECTURE.md) | 系统架构、数据流、部署架构 |
-| [前端设计](docs/FRONTEND.md) | 页面布局、功能模块、API交互 |
-| [后端 API](docs/BACKEND.md) | API 接口详细设计 |
-| [技术选型](docs/TECH_STACK.md) | 技术栈和成本分析 |
-| [模型调研](docs/MODEL_RESEARCH.md) | AI模型选型对比分析 |
-
----
-
-## 📝 开发计划
-
-- [ ] 环境搭建与模型部署
-- [ ] 后端 API 开发
-- [ ] 前端页面开发
-- [ ] 小龙虾动画实现
-- [ ] 测试与优化
-
----
-
-*当前阶段: 需求设计*
-*最后更新: 2026-03-18*
+**Made with ❤️ by MelodyClaw Team**
