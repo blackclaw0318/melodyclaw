@@ -24,16 +24,76 @@ def load_model():
     global _model, _utils
     if _model is None:
         print(f"[*] 加载 Silero VAD 模型...")
-        _model, _utils = torch.hub.load(
-            repo_or_dir='snakers4/silero-vad',
-            model='silero_vad',
-            force_reload=False,
-            trust_repo=True
-        )
+        # 使用本地 JIT 模型文件（避免 torch.hub 网络依赖）
+        model_path = Path(__file__).parent.parent / "models" / "silero" / "silero_vad.jit"
+        _model = torch.jit.load(str(model_path), map_location=DEVICE)
         _model.to(DEVICE)
         _model.eval()
+        # 工具函数（语音时间戳提取）
+        _utils = [get_speech_timestamps_wrapper]
         print(f"[✓] Silero VAD 模型已加载到 {DEVICE}")
     return _model, _utils
+
+
+def get_speech_timestamps_wrapper(waveform, model, sampling_rate=16000, **kwargs):
+    """Silero VAD 语音时间戳检测包装器 - 流式推理"""
+    # JIT 模型需要流式处理：每次 512 样本 (16kHz) 或 256 样本 (8kHz)
+    num_samples = 512 if sampling_rate == 16000 else 256
+    
+    # 重采样到目标采样率
+    if sampling_rate != 16000 and sampling_rate != 8000:
+        # 简单线性插值重采样
+        duration = len(waveform) / sampling_rate
+        new_length = int(duration * 16000)
+        indices = torch.linspace(0, len(waveform) - 1, new_length)
+        waveform = torch.interp(indices, torch.arange(len(waveform)), waveform)
+        sampling_rate = 16000
+        num_samples = 512
+    
+    with torch.no_grad():
+        speech_probs = []
+        for i in range(0, len(waveform), num_samples):
+            chunk = waveform[i:i + num_samples]
+            if len(chunk) < num_samples:
+                # 填充最后一个块
+                chunk = torch.nn.functional.pad(chunk, (0, num_samples - len(chunk)))
+            prob = model(chunk.unsqueeze(0), sampling_rate)
+            speech_probs.append(prob.item())
+    
+    # 转换为时间戳格式
+    timestamps = []
+    threshold = kwargs.get('threshold', 0.5)
+    min_speech_duration_ms = kwargs.get('min_speech_duration_ms', 500)
+    
+    in_speech = False
+    start_sample = 0
+    samples_per_frame = num_samples
+    
+    for i, prob in enumerate(speech_probs):
+        if prob > threshold and not in_speech:
+            in_speech = True
+            start_sample = i * samples_per_frame
+        elif prob <= threshold and in_speech:
+            in_speech = False
+            end_sample = i * samples_per_frame
+            duration_ms = (end_sample - start_sample) * 1000 / sampling_rate
+            if duration_ms >= min_speech_duration_ms:
+                timestamps.append({
+                    'start': start_sample,
+                    'end': end_sample
+                })
+    
+    # 处理最后一段
+    if in_speech:
+        end_sample = len(speech_probs) * samples_per_frame
+        duration_ms = (end_sample - start_sample) * 1000 / sampling_rate
+        if duration_ms >= min_speech_duration_ms:
+            timestamps.append({
+                'start': start_sample,
+                'end': end_sample
+            })
+    
+    return timestamps
 
 
 class AlignedLine(BaseModel):
