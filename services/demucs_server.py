@@ -70,6 +70,12 @@ async def separate(request: SeparateRequest):
         
         # 加载音频
         waveform, sr = load(audio_file)
+        
+        # 单声道转立体声
+        if waveform.shape[0] == 1:
+            print(f"[*] 单声道音频，转换为立体声...")
+            waveform = waveform.repeat(2, 1)
+        
         waveform = waveform.to(DEVICE)
         
         print(f"[*] 音频形状：{waveform.shape}, 采样率：{sr}")

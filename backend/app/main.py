@@ -41,8 +41,9 @@ DEMUCS_URL = os.getenv("DEMUCS_URL", "http://localhost:8001")
 SILERO_URL = os.getenv("SILERO_URL", "http://localhost:8002")
 RVC_URL = os.getenv("RVC_URL", "http://localhost:8003")
 
-# 数据目录
-DATA_DIR = Path(os.getenv("DATA_DIR", "data"))
+# 数据目录 (使用项目根目录)
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+DATA_DIR = PROJECT_ROOT / "data"
 UPLOAD_DIR = DATA_DIR / "uploads"
 SEPARATED_DIR = DATA_DIR / "separated"
 CLONED_DIR = DATA_DIR / "cloned"
@@ -281,15 +282,17 @@ async def separate_vocals(song_id: int, db: Session = Depends(get_db)):
     if not song.original_file or not os.path.exists(song.original_file):
         raise HTTPException(status_code=404, detail="音频文件不存在")
     
-    # 计算相对路径
+    # 计算相对路径 (从 data 目录开始)
     audio_path = str(Path(song.original_file).relative_to(DATA_DIR))
+    print(f"[分离] 歌曲 ID:{song_id}, 路径:{audio_path}")
     
-    async with httpx.AsyncClient(timeout=120.0) as client:
+    async with httpx.AsyncClient(timeout=300.0) as client:
         try:
             resp = await client.post(
                 f"{DEMUCS_URL}/separate",
                 json={"song_id": song_id, "audio_path": audio_path},
             )
+            print(f"[分离] 响应状态：{resp.status_code}")
             resp.raise_for_status()
             data = resp.json()
             
@@ -304,6 +307,7 @@ async def separate_vocals(song_id: int, db: Session = Depends(get_db)):
             return SeparateResponse(**data)
             
         except httpx.HTTPError as e:
+            print(f"[分离] 错误：{e}")
             raise HTTPException(status_code=503, detail=f"Demucs 服务不可用：{str(e)}")
 
 
@@ -332,7 +336,7 @@ async def align_lyrics(song_id: int, request: LyricsAlignRequest, db: Session = 
             # 更新歌曲状态
             if data.get("status") == "completed":
                 import json
-                song.aligned_lyrics = json.dumps([line.dict() for line in data.get("aligned_lyrics", [])])
+                song.aligned_lyrics = json.dumps(data.get("aligned_lyrics", []))
                 song.status = SongStatus.ALIGNED
                 song.align_task_id = data.get("task_id")
                 db.commit()
@@ -357,7 +361,18 @@ async def clone_voice(request: CloneRequest, db: Session = Depends(get_db)):
     song = db.query(Song).filter(Song.id == request.song_id).first()
     if not song:
         raise HTTPException(status_code=404, detail="歌曲不存在")
-    if not song.vocals_file or not os.path.exists(song.vocals_file):
+    
+    # 检查人声文件 (支持相对路径和绝对路径)
+    vocals_file = song.vocals_file
+    if not vocals_file:
+        raise HTTPException(status_code=404, detail="人声文件不存在，请先进行人声分离")
+    
+    # 如果是相对路径，转换为绝对路径
+    if not os.path.isabs(vocals_file):
+        vocals_file_abs = str(DATA_DIR / vocals_file)
+    
+    if not os.path.exists(vocals_file_abs):
+        print(f"[克隆] 人声文件不存在：{vocals_file_abs}")
         raise HTTPException(status_code=404, detail="人声文件不存在，请先进行人声分离")
     
     # 获取音色信息
@@ -365,8 +380,8 @@ async def clone_voice(request: CloneRequest, db: Session = Depends(get_db)):
     if not voice:
         raise HTTPException(status_code=400, detail=f"无效的音色 ID: {request.voice_id}")
     
-    # 计算相对路径
-    vocals_path = str(Path(song.vocals_file).relative_to(DATA_DIR))
+    # 计算相对路径 (从 data 目录开始)
+    vocals_path = str(Path(vocals_file_abs).relative_to(DATA_DIR))
     
     # 创建任务记录
     task = CloneTask(
