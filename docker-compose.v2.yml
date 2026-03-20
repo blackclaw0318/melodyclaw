@@ -1,0 +1,129 @@
+# MelodyClaw V2.0 Docker 部署配置
+version: '3.8'
+
+services:
+  # 前端服务
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: melodyclaw-frontend
+    ports:
+      - "3000:80"
+    environment:
+      - VITE_API_BASE_URL=/api
+    depends_on:
+      - backend
+    networks:
+      - melodyclaw-network
+    restart: unless-stopped
+
+  # 后端 API 服务
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: melodyclaw-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - melodyclaw-data:/app/data
+      - melodyclaw-uploads:/app/uploads
+    environment:
+      - DATABASE_URL=sqlite:///./data/melodyclaw.db
+      - UPLOAD_DIR=/app/uploads
+      - DEMUCS_URL=http://demucs:8001
+      - SILERO_URL=http://silero:8002
+      - RVC_URL=http://rvc:8003
+    depends_on:
+      - demucs
+      - silero
+      - rvc
+    networks:
+      - melodyclaw-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+
+  # Demucs 人声分离服务
+  demucs:
+    build:
+      context: .
+      dockerfile: Dockerfile.demucs
+    container_name: melodyclaw-demucs
+    ports:
+      - "8001:8001"
+    volumes:
+      - melodyclaw-data:/app/data
+    networks:
+      - melodyclaw-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+
+  # Silero 歌词对齐服务
+  silero:
+    build:
+      context: .
+      dockerfile: Dockerfile.silero
+    container_name: melodyclaw-silero
+    ports:
+      - "8002:8002"
+    volumes:
+      - melodyclaw-data:/app/data
+    networks:
+      - melodyclaw-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+
+  # RVC 音色克隆服务
+  rvc:
+    build:
+      context: .
+      dockerfile: Dockerfile.rvc
+    container_name: melodyclaw-rvc
+    ports:
+      - "8003:8003"
+    volumes:
+      - melodyclaw-data:/app/data
+      - melodyclaw-models:/app/models
+    networks:
+      - melodyclaw-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+
+  # Nginx 反向代理
+  nginx:
+    image: nginx:alpine
+    container_name: melodyclaw-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - melodyclaw-data:/data:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - melodyclaw-network
+    restart: unless-stopped
+
+networks:
+  melodyclaw-network:
+    driver: bridge
+
+volumes:
+  melodyclaw-data:
+  melodyclaw-uploads:
+  melodyclaw-models:
