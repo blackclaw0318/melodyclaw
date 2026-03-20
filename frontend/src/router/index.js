@@ -4,6 +4,8 @@ import Songs from '../views/Songs.vue'
 import Record from '../views/Record.vue'
 import Preview from '../views/Preview.vue'
 import Clone from '../views/Clone.vue'
+import Auth from '../views/Auth.vue'
+import Profile from '../views/Profile.vue'
 
 const routes = [
   { 
@@ -11,6 +13,18 @@ const routes = [
     name: 'Home', 
     component: Home,
     meta: { title: 'MelodyClaw - 首页' }
+  },
+  { 
+    path: '/auth', 
+    name: 'Auth', 
+    component: Auth,
+    meta: { title: '登录/注册 - MelodyClaw' }
+  },
+  { 
+    path: '/profile', 
+    name: 'Profile', 
+    component: Profile,
+    meta: { title: '个人中心 - MelodyClaw' }
   },
   { 
     path: '/songs', 

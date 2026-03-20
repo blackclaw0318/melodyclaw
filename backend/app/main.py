@@ -24,12 +24,14 @@ from pathlib import Path
 from database import get_db, init_db, engine
 from models import Base, Song, CloneTask, PresetVoice, SongStatus, TaskStatus
 from routes_v2 import router as router_v2
+from routes_user import router as router_user
 
 # ============== 配置 ==============
-app = FastAPI(title="MelodyClaw API", version="2.0.0", description="互动式卡拉 OK 系统 API")
+app = FastAPI(title="MelodyClaw API", version="3.0.0", description="互动式卡拉 OK 系统 - 用户社交版")
 
-# 注册 V2 路由
+# 注册路由
 app.include_router(router_v2)
+app.include_router(router_user)
 
 # 启用 CORS
 app.add_middleware(
