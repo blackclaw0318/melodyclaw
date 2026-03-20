@@ -1,233 +1,175 @@
 <template>
-  <div class="home">
-    <!-- 小龙虾动画 -->
-    <div class="lobster-container">
-      <svg viewBox="0 0 300 280" class="lobster-svg" :class="{ playing: isPlaying }">
-        <!-- 身体 -->
-        <ellipse class="body" cx="150" cy="180" rx="60" ry="40" />
-        <!-- 头部 -->
-        <circle class="head" cx="150" cy="120" r="40" />
-        <!-- 眼睛 -->
-        <g class="eyes">
-          <circle class="eye" cx="135" cy="110" r="8" />
-          <circle class="eye" cx="165" cy="110" r="8" />
-          <circle class="pupil" cx="137" cy="112" r="4" />
-          <circle class="pupil" cx="167" cy="112" r="4" />
-        </g>
-        <!-- 钳子 -->
-        <g class="claw left-claw" :style="{ transform: `rotate(${playing ? clawAngle : -20}deg)` }">
-          <path d="M 100 160 L 70 140 L 75 170 Z" />
-        </g>
-        <g class="claw right-claw" :style="{ transform: `rotate(${playing ? -clawAngle : 20}deg)` }">
-          <path d="M 200 160 L 230 140 L 225 170 Z" />
-        </g>
-        <!-- 触须 -->
-        <g class="antennae">
-          <path class="antenna" d="M 130 85 Q 120 60 110 50" />
-          <path class="antenna" d="M 170 85 Q 180 60 190 50" />
-          <circle class="antenna-tip" cx="110" cy="50" r="5" />
-          <circle class="antenna-tip" cx="190" cy="50" r="5" />
-        </g>
-        <!-- 尾巴 -->
-        <path class="tail" d="M 150 220 L 130 250 L 150 240 L 170 250 Z" />
-        <!-- 音符 -->
-        <g class="notes" v-if="playing">
-          <text class="note" x="80" y="80" :style="{ opacity: note1Opacity }">♪</text>
-          <text class="note" x="220" y="60" :style="{ opacity: note2Opacity }">♫</text>
-          <text class="note" x="90" y="50" :style="{ opacity: note3Opacity }">♬</text>
-        </g>
-        <!-- 歌词气泡 -->
-        <g class="lyric-bubble" v-if="currentLyric">
-          <rect class="bubble-bg" x="80" y="10" width="140" height="35" rx="10" />
-          <text class="lyric-text" x="150" y="33">{{ currentLyric }}</text>
-        </g>
-      </svg>
-    </div>
+  <div class="home min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+    <!-- 顶部导航栏 -->
+    <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-lg shadow-sm">
+      <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+        <h1 class="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          🦞 MelodyClaw
+        </h1>
+        <div class="flex items-center gap-3">
+          <button class="p-2 text-gray-600 hover:text-primary">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </button>
+          <button class="p-2 text-gray-600 hover:text-primary">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
 
-    <h1>🦞 MelodyClaw</h1>
-    <p class="subtitle">AI 歌声克隆系统 - 让你的歌曲唱出不同声音</p>
-    
-    <div class="actions">
-      <button @click="$router.push('/songs')" class="btn btn-primary">🎵 上传歌曲</button>
-      <button @click="$router.push('/clone')" class="btn btn-secondary">🎤 开始克隆</button>
-    </div>
+    <!-- 主要内容区 -->
+    <main class="max-w-6xl mx-auto px-4 py-6">
+      <!-- 欢迎横幅 -->
+      <div class="mb-6 bg-gradient-to-r from-primary to-secondary rounded-2xl p-6 text-white shadow-lg">
+        <h2 class="text-2xl font-bold mb-2">想唱就唱 🎤</h2>
+        <p class="opacity-90">选择一首歌曲，开始你的表演！</p>
+      </div>
 
-    <div class="stats" v-if="songCount !== null">
-      <div class="stat-card">
-        <div class="stat-num">{{ songCount }}</div>
-        <div class="stat-label">首歌曲</div>
+      <!-- 搜索和筛选 -->
+      <div class="mb-6 space-y-3">
+        <div class="relative">
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="搜索歌曲或歌手..."
+            class="w-full px-4 py-3 pl-12 bg-white rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+          />
+          <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </div>
+        
+        <div class="flex gap-2 overflow-x-auto pb-2">
+          <button
+            v-for="cat in categories"
+            :key="cat.id"
+            @click="selectedCategory = cat.id"
+            class="px-4 py-2 rounded-full whitespace-nowrap transition-all"
+            :class="selectedCategory === cat.id ? 'bg-primary text-white' : 'bg-white text-gray-600 hover:bg-gray-100'"
+          >
+            {{ cat.name }}
+          </button>
+        </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-num">6</div>
-        <div class="stat-label">种音色</div>
+
+      <!-- 歌曲列表 -->
+      <div v-if="loading" class="flex items-center justify-center py-20">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
-      <div class="stat-card">
-        <div class="stat-num">{{ serviceStatus }}</div>
-        <div class="stat-label">服务状态</div>
+
+      <div v-else-if="filteredSongs.length === 0" class="text-center py-20">
+        <div class="text-6xl mb-4">🎵</div>
+        <p class="text-gray-500">暂无歌曲</p>
       </div>
+
+      <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" data-testid="song-list">
+        <SongCard
+          v-for="song in filteredSongs"
+          :key="song.id"
+          :song="song"
+        />
+      </div>
+    </main>
+
+    <!-- 底部小龙虾动画 -->
+    <div class="fixed bottom-4 right-4 z-30">
+      <LobsterAnimation :is-playing="true" :initial-position="{ x: 0, y: 0 }" />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-import axios from 'axios'
+import { ref, computed, onMounted } from 'vue'
+import SongCard from '@/components/common/SongCard.vue'
+import LobsterAnimation from '@/components/lobster/LobsterAnimation.vue'
+import { songsApi } from '@/api/songs'
 
-const isPlaying = ref(false)
-const currentLyric = ref('')
-const clawAngle = ref(-20)
-const note1Opacity = ref(0)
-const note2Opacity = ref(0)
-const note3Opacity = ref(0)
-const songCount = ref(null)
-const serviceStatus = ref('检查中...')
+const searchQuery = ref('')
+const selectedCategory = ref('all')
+const songs = ref([])
+const loading = ref(true)
 
-let animationId = null
+const categories = [
+  { id: 'all', name: '全部' },
+  { id: 'pop', name: '流行' },
+  { id: 'rock', name: '摇滚' },
+  { id: 'folk', name: '民谣' },
+  { id: 'ballad', name: '抒情' }
+]
 
-const animate = () => {
-  const time = Date.now() / 500
-  clawAngle.value = Math.sin(time) * 20
-  note1Opacity.value = 0.5 + Math.sin(time) * 0.5
-  note2Opacity.value = 0.5 + Math.sin(time + 1) * 0.5
-  note3Opacity.value = 0.5 + Math.sin(time + 2) * 0.5
-  animationId = requestAnimationFrame(animate)
-}
-
-onMounted(async () => {
-  // 启动动画
-  animate()
-  isPlaying.value = true
-
-  // 获取歌曲数量 - 直接访问后端 8000 端口
-  try {
-    const r = await axios.get('http://111.228.46.221:8000/api/v1/songs')
-    songCount.value = r.data.length
-  } catch (e) {
-    songCount.value = 3  // 显示已知数量
+const filteredSongs = computed(() => {
+  let result = songs.value
+  
+  // 搜索过滤
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    result = result.filter(song => 
+      song.title.toLowerCase().includes(query) ||
+      (song.artist && song.artist.toLowerCase().includes(query))
+    )
   }
-
-  // 检查服务状态 - 直接访问后端 8000 端口
-  try {
-    const r = await axios.get('http://111.228.46.221:8000/api/v1/voices')
-    serviceStatus.value = r.data.length > 0 ? '正常' : '异常'
-  } catch (e) {
-    serviceStatus.value = '正常'  // 即使检查失败也显示正常
+  
+  // 分类过滤（暂时按 BPM 简单分类）
+  if (selectedCategory.value !== 'all') {
+    // 后续可以根据实际分类字段过滤
   }
+  
+  return result
 })
 
-onUnmounted(() => {
-  if (animationId) cancelAnimationFrame(animationId)
+onMounted(async () => {
+  try {
+    const data = await songsApi.getList()
+    songs.value = Array.isArray(data) ? data : []
+  } catch (error) {
+    console.error('获取歌曲列表失败:', error)
+    // 使用测试数据
+    songs.value = [
+      {
+        id: 1,
+        title: '测试歌曲 - 青花瓷',
+        artist: '周杰伦',
+        duration: 239,
+        bpm: 120,
+        duet_count: 128,
+        cover_url: null
+      },
+      {
+        id: 2,
+        title: '测试歌曲 - 告白气球',
+        artist: '周杰伦',
+        duration: 215,
+        bpm: 100,
+        duet_count: 256,
+        cover_url: null
+      }
+    ]
+  } finally {
+    loading.value = false
+  }
 })
 </script>
 
 <style scoped>
 .home {
-  text-align: center;
-  padding: 2rem;
+  padding-bottom: 100px;
 }
 
-.lobster-container {
-  width: 280px;
-  height: 280px;
-  margin: 0 auto 1.5rem;
+/* 隐藏滚动条但保持滚动功能 */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 4px;
 }
 
-.lobster-svg {
-  width: 100%;
-  height: 100%;
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
 }
 
-.body, .claw { fill: #ff6b6b; }
-.head { fill: #ff8787; }
-.eye { fill: white; }
-.pupil { fill: #333; }
-.antenna, .antenna-tip, .tail { fill: #ff6b6b; }
-.note { fill: #667eea; font-size: 24px; }
-.bubble-bg { fill: rgba(102, 126, 234, 0.9); }
-.lyric-text { fill: white; font-size: 14px; text-anchor: middle; font-weight: bold; }
-
-.claw {
-  transform-origin: 150px 160px;
-  transition: transform 0.1s ease;
-}
-
-.playing .body,
-.playing .head {
-  animation: pulse 0.5s ease infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.02); }
-}
-
-h1 {
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.subtitle {
-  color: #666;
-  font-size: 1.1rem;
-  margin-bottom: 2rem;
-}
-
-.actions {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  margin-bottom: 3rem;
-}
-
-.btn {
-  padding: 1rem 2rem;
-  font-size: 1.1rem;
-  border: none;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-
-.btn:hover { transform: translateY(-2px); }
-
-.btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
-
-.btn-secondary {
-  background: white;
-  color: #667eea;
-  border: 2px solid #667eea;
-}
-
-.stats {
-  display: flex;
-  gap: 2rem;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.stat-card {
-  background: white;
-  padding: 1.5rem 2rem;
-  border-radius: 1rem;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-  min-width: 120px;
-}
-
-.stat-num {
-  font-size: 2.5rem;
-  font-weight: bold;
-  color: #667eea;
-}
-
-.stat-label {
-  color: #999;
-  font-size: 0.9rem;
-  margin-top: 0.5rem;
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 2px;
 }
 </style>

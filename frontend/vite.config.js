@@ -1,8 +1,32 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import { fileURLToPath, URL } from 'node:url'
 
 export default defineConfig({
   plugins: [vue()],
-  server: { host: '0.0.0.0', port: 3000 },
-  build: { outDir: 'dist' }
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url))
+    }
+  },
+  server: { 
+    host: '0.0.0.0', 
+    port: 3000,
+    proxy: {
+      '/api': {
+        target: 'http://111.228.46.221:8000',
+        changeOrigin: true
+      }
+    }
+  },
+  build: { 
+    outDir: 'dist',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['vue', 'vue-router', 'pinia', 'axios']
+        }
+      }
+    }
+  }
 })
