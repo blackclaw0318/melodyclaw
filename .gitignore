@@ -32,3 +32,7 @@ models/
 
 # Environment
 .env
+
+# Database
+*.db
+!data/.gitkeep
