@@ -1,160 +1,214 @@
-# 🦞 MelodyClaw - AI 歌声克隆系统
+# 🦞 MelodyClaw V2.0
 
-> 完全本地化运行，CPU 推理，零 API 费用
+> **互动式卡拉 OK 系统** - 与小龙虾一起唱歌！
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/python-3.12-green.svg)](https://python.org)
-[![Vue](https://img.shields.io/badge/vue-3.4-green.svg)](https://vuejs.org)
+[![Version](https://img.shields.io/badge/version-2.0-blue.svg)](https://github.com/blackclaw0318/melodyclaw)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Status](https://img.shields.io/badge/status-development-yellow.svg)](https://github.com/blackclaw0318/melodyclaw)
 
-## ✨ 特性
+---
 
-- 🎤 **人声分离** - Demucs AI 模型，分离人声和伴奏
-- 📝 **歌词对齐** - Silero VAD，自动生成时间戳
-- 🎭 **音色克隆** - 6 种预设音色，CPU 推理
-- 🦞 **小龙虾动画** - 随音乐律动的可爱播放器
-- 📱 **响应式设计** - 手机/平板/桌面全适配
-- 🔒 **隐私安全** - 数据完全本地，不上传云端
+## 📖 项目简介
+
+MelodyClaw V2.0 是一款**互动式卡拉 OK 应用**，核心特色：
+
+- 🎤 **实时拍摄** - 摄像头录制唱歌视频
+- 🦞 **AR 互动** - 可拖动的小龙虾动画角色
+- 📝 **动态歌词** - 可自由拖动的滚动歌词
+- ⏱️ **智能倒计时** - 3-2-1 倒计时 + BPM 同步
+- 🎬 **视频预览** - 即时回放与下载
+
+**类似产品**: 全民 K 歌、唱吧的 Web 版本
+
+---
+
+## 📁 分支说明
+
+本仓库包含以下主要分支：
+
+| 分支 | 用途 | 内容 |
+|------|------|------|
+| `greyclaw_0317` | 原始设计 | 需求文档 |
+| `blackclaw_0318` | 完整实现 | 全部代码 + 文档 |
+| `blackclaw_0321` | 开发分支 | 最新开发进度 |
+| **`blackclaw_0323`** | **文档分支** | **需求文档 + 实现方案** |
+
+> 💡 **当前分支**: `blackclaw_0323` - 仅包含项目文档，无代码实现
+
+---
+
+## 📚 文档导航
+
+### 核心文档
+
+| 文档 | 说明 | 路径 |
+|------|------|------|
+| 📋 **项目需求** | 完整功能需求说明 | `docs/PROJECT_REQUIREMENTS.md` |
+| 🏗️ **技术架构** | 系统架构设计 | `docs/ARCHITECTURE_V2.md` |
+| 📝 **实现方案** | 详细技术实现方案 | `IMPLEMENTATION_PLAN.md` |
+
+### 其他文档
+
+- `docs/BACKEND.md` - 后端详细设计
+- `docs/FRONTEND.md` - 前端详细设计
+- `docs/TECH_STACK.md` - 技术栈说明
+- `docs/DEPLOYMENT.md` - 部署指南
+
+---
+
+## 🎯 核心功能
+
+### 功能模块
+
+```
+┌─────────────────────────────────────────────────────┐
+│                   MelodyClaw V2.0                    │
+├─────────────────────────────────────────────────────┤
+│  📱 首页          │  歌曲列表、搜索、分类筛选        │
+│  🎤 拍摄页        │  摄像头、小龙虾、歌词、录制      │
+│  🎬 预览页        │  视频回放、保存、分享            │
+│  👤 个人中心 (P2) │  作品管理、社交功能              │
+└─────────────────────────────────────────────────────┘
+```
+
+### 技术特性
+
+| 特性 | 实现方案 |
+|------|----------|
+| 摄像头调用 | MediaDevices API |
+| 视频录制 | MediaRecorder API |
+| 动画渲染 | Canvas + requestAnimationFrame |
+| 拖拽交互 | Touch/Mouse 事件处理 |
+| 音频播放 | Web Audio API |
+| 后端框架 | FastAPI + Uvicorn |
+| 前端框架 | Vue 3 + Vite + TailwindCSS |
+| 数据库 | SQLite / PostgreSQL |
+
+---
 
 ## 🚀 快速开始
 
-### Docker 部署 (推荐)
+### 开发环境
 
 ```bash
-# 克隆项目
+# 1. 克隆项目
 git clone https://github.com/blackclaw0318/melodyclaw.git
 cd melodyclaw
 
+# 2. 切换到代码分支
+git checkout blackclaw_0321
+
+# 3. 安装依赖并启动
+# 详见 IMPLEMENTATION_PLAN.md
+```
+
+### Docker 部署
+
+```bash
+# 使用代码分支
+git checkout blackclaw_0321
+
 # 启动服务
-docker-compose up -d
+docker-compose -f docker-compose.v2.yml up -d
 
 # 访问
 # 前端：http://localhost:3000
 # API: http://localhost:8000/docs
 ```
 
-### 本地部署
+---
 
-```bash
-# 1. 安装依赖
-pip install -r requirements-main.txt
-pip install -r requirements-demucs.txt
-pip install -r requirements-silero.txt
-pip install -r requirements-rvc.txt
+## 📊 项目进度
 
-# 2. 启动服务
-python services/demucs_server.py &
-python services/silero_server.py &
-python services/rvc_server.py &
-python backend/app/main.py &
+| 阶段 | 任务 | 状态 | 完成度 |
+|------|------|------|--------|
+| 阶段 1 | 前端基础重构 | ✅ | 100% |
+| 阶段 2 | 页面开发 | ✅ | 100% |
+| 阶段 3 | 后端 API 扩展 | ✅ | 100% |
+| 阶段 4 | 集成测试 | ✅ | 100% |
+| 阶段 5 | 优化与部署 | ⏳ | 0% |
+| 阶段 6 | 商业化功能 | ⏸️ | 0% |
 
-# 3. 前端
-cd frontend
-npm install
-npm run dev
-```
-
-## 📁 项目结构
-
-```
-melodyclaw/
-├── backend/          # FastAPI 后端
-│   └── app/
-│       ├── main.py   # 主 API
-│       ├── models.py # 数据库模型
-│       └── database.py
-├── frontend/         # Vue3 前端
-│   └── src/
-│       ├── views/    # 页面组件
-│       └── components/
-├── services/         # AI 服务
-│   ├── demucs_server.py
-│   ├── silero_server.py
-│   └── rvc_server.py
-├── models/           # 模型文件
-├── docs/             # 文档
-└── docker-compose.yml
-```
-
-## 🎯 使用流程
-
-1. **上传歌曲** - 支持 MP3/WAV/FLAC/M4A/OGG
-2. **人声分离** - AI 分离人声和伴奏 (~1 倍实时)
-3. **歌词对齐** - 输入歌词，自动生成时间戳
-4. **音色克隆** - 选择预设音色，生成克隆版本
-5. **下载结果** - 下载克隆后的音频
-
-## 🎤 预设音色
-
-| 音色 | 风格 | F0 范围 | 适用场景 |
-|------|------|--------|----------|
-| 流行男声 | 温暖明亮 | 80-400Hz | 流行、抒情 |
-| 流行女声 | 清澈甜美 | 150-600Hz | 流行、抒情 |
-| 摇滚男声 | 粗犷有力 | 70-350Hz | 摇滚、金属 |
-| 民谣嗓音 | 朴实自然 | 90-420Hz | 民谣、乡村 |
-| 童声 | 稚嫩可爱 | 200-800Hz | 儿歌、童谣 |
-| 低沉嗓音 | 浑厚磁性 | 60-300Hz | 抒情、爵士 |
-
-## 📊 性能
-
-| 操作 | 1 分钟 | 3 分钟 | 5 分钟 |
-|------|--------|--------|--------|
-| 人声分离 | ~60s | ~180s | ~300s |
-| 歌词对齐 | ~10s | ~30s | ~50s |
-| 音色克隆 | ~90s | ~270s | ~450s |
-
-**硬件要求:**
-- CPU: 4 核+
-- 内存：16GB+
-- 存储：50GB+
-
-## 📖 文档
-
-- [部署指南](docs/DEPLOYMENT.md)
-- [性能优化](docs/PERFORMANCE.md)
-- [集成测试](docs/INTEGRATION_TEST.md)
-- [模型测试报告](docs/MODEL_TEST_REPORT.md)
-
-## 🛠️ 技术栈
-
-**后端:**
-- FastAPI + Uvicorn
-- SQLAlchemy + SQLite
-- Celery (任务队列)
-
-**AI 模型:**
-- Demucs (人声分离)
-- Silero VAD (语音检测)
-- Hubert + RVC (音色克隆)
-
-**前端:**
-- Vue3 + Vite
-- Pinia (状态管理)
-- Vue Router
-
-**部署:**
-- Docker + Docker Compose
-- Nginx (反向代理)
-
-## 📝 开发进度
-
-- [x] 阶段 1: 环境与模型部署
-- [x] 阶段 2: 后端 API 开发
-- [x] 阶段 3: 前端开发
-- [x] 阶段 4: 集成优化
-- [ ] 阶段 5: 商业化功能
-
-## 🤝 贡献
-
-欢迎提交 Issue 和 Pull Request!
-
-## 📄 许可证
-
-MIT License
-
-## 👥 作者
-
-- **blackclaw0318** - [GitHub](https://github.com/blackclaw0318)
+**总体进度**: 60%
 
 ---
 
-**Made with ❤️ by MelodyClaw Team**
+## 🛠️ 技术栈
+
+### 前端
+
+- **框架**: Vue 3.4 + Vite
+- **样式**: TailwindCSS 4
+- **状态管理**: Pinia
+- **路由**: Vue Router
+
+### 后端
+
+- **Web 框架**: FastAPI
+- **服务器**: Uvicorn
+- **ORM**: SQLAlchemy
+- **数据库**: SQLite / PostgreSQL
+- **视频处理**: FFmpeg
+
+### 部署
+
+- **容器化**: Docker + Docker Compose
+- **反向代理**: Nginx
+- **HTTPS**: Let's Encrypt
+
+---
+
+## 📝 开发计划
+
+### 近期任务（阶段 5）
+
+- [ ] 前端性能优化（图片懒加载、代码分割）
+- [ ] 后端视频转码异步化
+- [ ] Docker 部署配置更新
+- [ ] 文档完善
+
+### 后续规划（阶段 6）
+
+- [ ] 用户系统（注册/登录）
+- [ ] 社交功能（分享、评论、点赞）
+- [ ] 商业化功能（VIP 音色、云存储）
+
+---
+
+## 🤝 贡献指南
+
+1. Fork 本仓库
+2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 开启 Pull Request
+
+---
+
+## 📄 许可证
+
+本项目采用 MIT 许可证 - 详见 [LICENSE](LICENSE) 文件
+
+---
+
+## 📞 联系方式
+
+- **项目仓库**: https://github.com/blackclaw0318/melodyclaw
+- **作者**: blackclaw0318
+- **Issue 反馈**: https://github.com/blackclaw0318/melodyclaw/issues
+
+---
+
+## 🙏 致谢
+
+感谢以下开源项目：
+
+- [Vue.js](https://vuejs.org/)
+- [FastAPI](https://fastapi.tiangolo.com/)
+- [TailwindCSS](https://tailwindcss.com/)
+- [FFmpeg](https://ffmpeg.org/)
+
+---
+
+**最后更新**: 2026-03-23  
+**当前分支**: `blackclaw_0323` (文档分支)
