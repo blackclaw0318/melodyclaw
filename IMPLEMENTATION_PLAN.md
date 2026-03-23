@@ -363,52 +363,117 @@ CREATE TABLE recordings_v2 (
 
 ### 6.1 Docker 部署（推荐）
 
+**后端镜像** (`Dockerfile.backend`):
+
+```dockerfile
+FROM python:3.12-slim
+WORKDIR /app
+RUN apt-get update && apt-get install -y ffmpeg libsndfile1 && rm -rf /var/lib/apt/lists/*
+COPY requirements-*.txt ./
+RUN pip install --no-cache-dir -r requirements-main.txt
+COPY backend/app ./backend/app
+COPY services ./services
+RUN mkdir -p /app/data/{uploads,separated,cloned}
+EXPOSE 8000 8001 8002 8003
+CMD ["sh", "-c", "python services/demucs_server.py & python services/silero_server.py & python services/rvc_server.py & python backend/app/main.py"]
+```
+
+**前端镜像** (`Dockerfile.frontend`):
+
+```dockerfile
+FROM node:22-alpine
+WORKDIR /app
+COPY frontend/package*.json ./
+RUN npm install
+COPY frontend/ ./
+RUN npm run build
+FROM nginx:alpine
+COPY --from=0 /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+```
+
+**Docker Compose** (`docker-compose.yml`):
+
 ```yaml
-# docker-compose.yml
 version: '3.8'
 services:
-  frontend:
-    build: ./frontend
-    ports:
-      - "3000:80"
-  
   backend:
-    build: ./backend
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
     ports:
       - "8000:8000"
+      - "8001:8001"
+      - "8002:8002"
+      - "8003:8003"
     volumes:
-      - ./data:/app/data
-  
-  nginx:
-    image: nginx:alpine
+      - melodyclaw-data:/app/data
+    environment:
+      - DATABASE_URL=sqlite:///./melodyclaw.db
+    deploy:
+      resources:
+        limits:
+          memory: 12G
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
     ports:
-      - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - "3000:80"
+    depends_on:
+      - backend
+volumes:
+  melodyclaw-data:
 ```
 
 ### 6.2 部署步骤
 
 ```bash
-# 1. 构建镜像
-docker-compose build
+# 1. 构建并启动
+docker-compose up -d --build
 
-# 2. 启动服务
-docker-compose up -d
-
-# 3. 查看日志
+# 2. 查看日志
 docker-compose logs -f
 
-# 4. 停止服务
+# 3. 停止服务
 docker-compose down
+
+# 4. 清理数据（可选）
+docker-compose down -v
 ```
 
-### 6.3 生产环境
+### 6.3 访问地址
 
-- 使用 HTTPS（Let's Encrypt）
-- 配置 CDN 加速静态资源
-- 数据库备份策略
-- 监控告警（Prometheus + Grafana）
+| 服务 | 地址 |
+|------|------|
+| 前端 | http://localhost:3000 |
+| API | http://localhost:8000 |
+| API 文档 | http://localhost:8000/docs |
+
+### 6.4 生产环境
+
+**Nginx 反向代理**:
+
+```nginx
+server {
+    listen 80;
+    server_name melodyclaw.example.com;
+    location / { proxy_pass http://localhost:3000; }
+    location /api { proxy_pass http://localhost:8000; }
+}
+```
+
+**HTTPS 配置**:
+
+```bash
+certbot --nginx -d melodyclaw.example.com
+```
+
+**资源要求**:
+- CPU: 4 核+
+- 内存：16GB+
+- 存储：50GB+
 
 ---
 

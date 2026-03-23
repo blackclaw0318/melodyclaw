@@ -39,20 +39,15 @@ MelodyClaw V2.0 是一款**互动式卡拉 OK 应用**，核心特色：
 
 ## 📚 文档导航
 
-### 核心文档
+### 核心文档（仅保留最新）
 
-| 文档 | 说明 | 路径 |
-|------|------|------|
-| 📋 **项目需求** | 完整功能需求说明 | `docs/PROJECT_REQUIREMENTS.md` |
-| 🏗️ **技术架构** | 系统架构设计 | `docs/ARCHITECTURE_V2.md` |
-| 📝 **实现方案** | 详细技术实现方案 | `IMPLEMENTATION_PLAN.md` |
+| 文档 | 说明 | 日期 | 路径 |
+|------|------|------|------|
+| 📋 **项目需求** | V2.0 完整功能需求 | 2026-03-21 | `docs/PROJECT_REQUIREMENTS.md` |
+| 🏗️ **技术架构** | V2.0 系统架构设计 | 2026-03-20 | `docs/ARCHITECTURE_V2.md` |
+| 📝 **实现方案** | 详细技术实现方案 | 2026-03-23 | `IMPLEMENTATION_PLAN.md` |
 
-### 其他文档
-
-- `docs/BACKEND.md` - 后端详细设计
-- `docs/FRONTEND.md` - 前端详细设计
-- `docs/TECH_STACK.md` - 技术栈说明
-- `docs/DEPLOYMENT.md` - 部署指南
+> 💡 已删除 10 个老旧/重复文档，仅保留上述 3 个核心文档
 
 ---
 
