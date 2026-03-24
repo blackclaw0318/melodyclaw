@@ -51,6 +51,9 @@ class Settings(BaseSettings):
     DEFAULT_SAMPLE_RATE: int = 44100
     DEFAULT_FORMAT: str = "wav"
     
+    # CORS 配置
+    CORS_ORIGINS: list = ["http://localhost:3000", "http://127.0.0.1:3000", "*"]
+    
     class Config:
         env_file = ".env"
         case_sensitive = True
@@ -65,3 +68,10 @@ class Settings(BaseSettings):
 # 全局配置实例
 settings = Settings()
 settings.ensure_dirs()
+
+
+# 数据库依赖
+def get_db():
+    """获取数据库会话（占位实现，实际使用 SQLAlchemy）"""
+    # TODO: 实现实际的数据库会话管理
+    pass
