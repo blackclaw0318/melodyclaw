@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/
+.venv
+
+# Environment
+.env
+.env.local
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Storage (keep directory structure)
+storage/uploads/*
+storage/processed/*
+storage/cache/*
+!storage/uploads/.gitkeep
+!storage/processed/.gitkeep
+!storage/cache/.gitkeep
+
+# Models (will be downloaded)
+ai_models/checkpoints/
+ai_models/*.pth
+ai_models/*.pt
+
+# Build
+dist/
+build/
+*.egg-info/
+
+# OS
+.DS_Store
+Thumbs.db

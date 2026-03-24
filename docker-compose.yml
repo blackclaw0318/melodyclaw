@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  # 后端服务
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: melodyclaw-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../storage:/app/storage
+      - ../ai_models:/app/ai_models
+    environment:
+      - DATABASE_URL=sqlite+aiosqlite:///./melodyclaw.db
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    deploy:
+      resources:
+        limits:
+          memory: 14G
+
+  # 前端服务
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: melodyclaw-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+  # Redis 消息队列
+  redis:
+    image: redis:7-alpine
+    container_name: melodyclaw-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+  # Celery Worker
+  celery-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: melodyclaw-celery
+    volumes:
+      - ../storage:/app/storage
+      - ../ai_models:/app/ai_models
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - redis
+    command: celery -A app.tasks worker --loglevel=info
+
+volumes:
+  redis_data:
