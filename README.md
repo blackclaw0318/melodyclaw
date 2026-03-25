@@ -1,160 +1,119 @@
-# 🦞 MelodyClaw - AI 歌声克隆系统
+# MelodyClaw
 
-> 完全本地化运行，CPU 推理，零 API 费用
+歌声克隆系统 - 完全本地化运行，CPU 推理
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/python-3.12-green.svg)](https://python.org)
-[![Vue](https://img.shields.io/badge/vue-3.4-green.svg)](https://vuejs.org)
+## 项目概述
 
-## ✨ 特性
+MelodyClaw 是一个歌声克隆系统，核心功能：
+- **人声分离** (Demucs) - 从歌曲中分离人声和伴奏
+- **歌词对齐** (Silero VAD) - 语音活动检测，对齐歌词时间戳
+- **音色克隆** (RVC v2) - 基于检索的语音转换
 
-- 🎤 **人声分离** - Demucs AI 模型，分离人声和伴奏
-- 📝 **歌词对齐** - Silero VAD，自动生成时间戳
-- 🎭 **音色克隆** - 6 种预设音色，CPU 推理
-- 🦞 **小龙虾动画** - 随音乐律动的可爱播放器
-- 📱 **响应式设计** - 手机/平板/桌面全适配
-- 🔒 **隐私安全** - 数据完全本地，不上传云端
+## 系统要求
 
-## 🚀 快速开始
+- **主机:** 4c16g Ubuntu Server (4 核 16GB，无 GPU)
+- **Python:** 3.10+
+- **存储:** 10GB+ 可用空间
 
-### Docker 部署 (推荐)
+## 快速开始
 
-```bash
-# 克隆项目
-git clone https://github.com/blackclaw0318/melodyclaw.git
-cd melodyclaw
-
-# 启动服务
-docker-compose up -d
-
-# 访问
-# 前端：http://localhost:3000
-# API: http://localhost:8000/docs
-```
-
-### 本地部署
+### 环境搭建
 
 ```bash
-# 1. 安装依赖
-pip install -r requirements-main.txt
-pip install -r requirements-demucs.txt
-pip install -r requirements-silero.txt
-pip install -r requirements-rvc.txt
+# 1. 运行环境设置脚本
+chmod +x setup_env.sh
+./setup_env.sh
 
-# 2. 启动服务
-python services/demucs_server.py &
-python services/silero_server.py &
-python services/rvc_server.py &
-python backend/app/main.py &
+# 2. 激活虚拟环境
+source venv/bin/activate
 
-# 3. 前端
-cd frontend
-npm install
-npm run dev
+# 3. 运行测试
+./run_phase1_tests.sh
 ```
 
-## 📁 项目结构
+## 项目结构
 
 ```
 melodyclaw/
-├── backend/          # FastAPI 后端
-│   └── app/
-│       ├── main.py   # 主 API
-│       ├── models.py # 数据库模型
-│       └── database.py
-├── frontend/         # Vue3 前端
-│   └── src/
-│       ├── views/    # 页面组件
-│       └── components/
-├── services/         # AI 服务
-│   ├── demucs_server.py
-│   ├── silero_server.py
-│   └── rvc_server.py
-├── models/           # 模型文件
-├── docs/             # 文档
-└── docker-compose.yml
+├── tests/              # 测试脚本
+│   ├── test_demucs.py      # Demucs 人声分离测试
+│   ├── test_silero_vad.py  # Silero VAD 测试
+│   ├── test_rvc.py         # RVC v2 测试
+│   └── test_memory.py      # 内存压力测试
+├── docs/               # 文档
+│   └── PHASE1_SETUP.md # 环境设置指南
+├── requirements.txt    # Python 依赖
+├── requirements-rvc.txt # RVC 专用依赖
+├── setup_env.sh        # 环境设置脚本
+├── run_phase1_tests.sh # 测试运行脚本
+└── README.md           # 本文件
 ```
 
-## 🎯 使用流程
+## 开发阶段
 
-1. **上传歌曲** - 支持 MP3/WAV/FLAC/M4A/OGG
-2. **人声分离** - AI 分离人声和伴奏 (~1 倍实时)
-3. **歌词对齐** - 输入歌词，自动生成时间戳
-4. **音色克隆** - 选择预设音色，生成克隆版本
-5. **下载结果** - 下载克隆后的音频
+### 阶段 1：环境搭建与模型部署测试 ✅ (进行中)
 
-## 🎤 预设音色
+- [x] Python 虚拟环境配置
+- [x] 基础依赖安装 (FastAPI, numpy, scipy, demucs, silero-vad)
+- [x] Demucs 模型测试脚本
+- [x] Silero VAD 测试脚本
+- [x] RVC v2 测试脚本
+- [x] 内存压力测试脚本
+- [ ] 模型下载与验证
+- [ ] CPU 推理性能基准测试
 
-| 音色 | 风格 | F0 范围 | 适用场景 |
-|------|------|--------|----------|
-| 流行男声 | 温暖明亮 | 80-400Hz | 流行、抒情 |
-| 流行女声 | 清澈甜美 | 150-600Hz | 流行、抒情 |
-| 摇滚男声 | 粗犷有力 | 70-350Hz | 摇滚、金属 |
-| 民谣嗓音 | 朴实自然 | 90-420Hz | 民谣、乡村 |
-| 童声 | 稚嫩可爱 | 200-800Hz | 儿歌、童谣 |
-| 低沉嗓音 | 浑厚磁性 | 60-300Hz | 抒情、爵士 |
+### 阶段 2：后端 API 开发 (待开始)
 
-## 📊 性能
+- [ ] FastAPI 项目搭建
+- [ ] 歌曲上传/管理 API
+- [ ] 人声分离 API
+- [ ] 歌词对齐 API
+- [ ] 音色克隆 API
+- [ ] Celery 任务队列
 
-| 操作 | 1 分钟 | 3 分钟 | 5 分钟 |
-|------|--------|--------|--------|
-| 人声分离 | ~60s | ~180s | ~300s |
-| 歌词对齐 | ~10s | ~30s | ~50s |
-| 音色克隆 | ~90s | ~270s | ~450s |
+### 阶段 3：前端开发 (待开始)
 
-**硬件要求:**
-- CPU: 4 核+
-- 内存：16GB+
-- 存储：50GB+
+- [ ] Vue3 项目搭建
+- [ ] 首页（小龙虾动画播放器）
+- [ ] 歌曲管理页面
+- [ ] 歌词编辑页面
+- [ ] 克隆任务管理
 
-## 📖 文档
+### 阶段 4：集成测试与优化 (待开始)
 
-- [部署指南](docs/DEPLOYMENT.md)
-- [性能优化](docs/PERFORMANCE.md)
-- [集成测试](docs/INTEGRATION_TEST.md)
-- [模型测试报告](docs/MODEL_TEST_REPORT.md)
+- [ ] 端到端测试
+- [ ] 性能优化
+- [ ] Docker 部署
 
-## 🛠️ 技术栈
+## 技术栈
 
-**后端:**
-- FastAPI + Uvicorn
-- SQLAlchemy + SQLite
-- Celery (任务队列)
+- **后端:** FastAPI + Celery + Redis
+- **前端:** Vue3 + Vite + Pinia
+- **AI 模型:** Demucs + RVC v2 + Silero VAD
+- **数据库:** SQLite (轻量级)
+- **部署:** Docker + Nginx
 
-**AI 模型:**
-- Demucs (人声分离)
-- Silero VAD (语音检测)
-- Hubert + RVC (音色克隆)
+## 内存优化策略
 
-**前端:**
-- Vue3 + Vite
-- Pinia (状态管理)
-- Vue Router
+针对 16GB 内存限制，采用**顺序模型加载**策略：
 
-**部署:**
-- Docker + Docker Compose
-- Nginx (反向代理)
+1. 一次只加载一个模型到内存
+2. 处理完成后立即卸载
+3. 使用 `gc.collect()` 强制垃圾回收
+4. 避免同时加载多个大模型
 
-## 📝 开发进度
+详见：`docs/PHASE1_SETUP.md`
 
-- [x] 阶段 1: 环境与模型部署
-- [x] 阶段 2: 后端 API 开发
-- [x] 阶段 3: 前端开发
-- [x] 阶段 4: 集成优化
-- [ ] 阶段 5: 商业化功能
+## GitHub
 
-## 🤝 贡献
+- **Fork:** blackclaw0318/melodyclaw
+- **分支:** blackclaw_0318
+- **源仓库:** GreyClaw0311/melodyclaw
 
-欢迎提交 Issue 和 Pull Request!
+## License
 
-## 📄 许可证
-
-MIT License
-
-## 👥 作者
-
-- **blackclaw0318** - [GitHub](https://github.com/blackclaw0318)
+MIT
 
 ---
 
-**Made with ❤️ by MelodyClaw Team**
+_HandFoot 商业帝国 · AI 算法工程部_

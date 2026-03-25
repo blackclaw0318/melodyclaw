@@ -1,19 +1,17 @@
-# RVC 音色克隆服务依赖
-# PyTorch CPU 版本
-torch==2.2.0
-torchaudio==2.2.0
---index-url https://pypi.tuna.tsinghua.edu.cn/simple
+# RVC v2 Dependencies
+# Install separately due to custom requirements
 
-# RVC 核心依赖
+# Core RVC dependencies
 fairseq==0.12.2
-faiss-cpu>=1.8.0
-librosa==0.10.1
-numpy==1.26.3
-scipy==1.12.0
-praat-parselmouth==0.4.3
-pyworld==0.3.4
+librosa>=0.10.0
+praat-parselmouth>=0.4.3
+pyworld>=0.3.2
+faiss-cpu>=1.7.4
+torchcrepe>=0.0.20
+rmvpe>=0.1.0
 
-# HTTP 服务
-fastapi==0.109.0
-uvicorn[standard]==0.27.0
-python-multipart==0.0.6
+# Note: Some RVC components may require compilation
+# If installation fails, try:
+#   pip install --no-build-isolation fairseq
+# Or use pre-built wheels from:
+#   https://github.com/faroit/python-wheels
